@@ -54,11 +54,11 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("login.html", error="must provide username")
+            return render_template("login.html", error="Must provide username")
 
             # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("login.html", error="must provide password")
+            return render_template("login.html", error="Must provide password")
 
         username = request.form.get("username")
 
@@ -72,7 +72,7 @@ def login():
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
-            return render_template("login.html", error="invalid username or password")
+            return render_template("login.html", error="Invalid username or password")
 
             # Remember which user has logged in
         session["user_id"] = rows[0][0]
