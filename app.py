@@ -4,6 +4,7 @@ import sqlite3
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -38,9 +39,24 @@ c.execute("""CREATE TABLE IF NOT EXISTS users (
 conn.commit()
 
 
+def login_required(f):
+    """
+    Decorate routes to require login.
+
+    http://flask.pocoo.org/docs/1.0/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/')
+@login_required
 def index():
-    return 'Hello, World test'
+    return render_template("index.html")
 
 
 @app.route('/login', methods=['GET', 'POST'])
