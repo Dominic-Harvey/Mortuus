@@ -36,6 +36,22 @@ c.execute("""CREATE TABLE IF NOT EXISTS users (
     'hash' TEXT NOT NULL   
 )""")
 
+c.execute("""CREATE TABLE IF NOT EXISTS"deceased" (
+	"id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	"first name"	TEXT NOT NULL,
+    "last name"	TEXT NOT NULL,
+	"location"	TEXT NOT NULL,
+    "rfb"	TEXT,
+	"c/b"	TEXT,
+	"viewing"	TEXT,
+	"papers"	TEXT,
+	"music"	TEXT,
+	"sheets"	TEXT,
+	"encoffined"	TEXT,
+	"clothes"	TEXT,
+	"prep"	TEXT
+)""")
+
 conn.commit()
 
 
@@ -56,7 +72,14 @@ def login_required(f):
 @app.route('/')
 @login_required
 def index():
-    return render_template("index.html")
+
+    conn = sqlite3.connect('mortuus.db')
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM deceased")
+    deceased = c.fetchall()
+
+    return render_template("index.html", deceased=deceased)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -138,6 +161,17 @@ def register():
         return redirect("login")
 
     return render_template("register.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
 
 
 if __name__ == '__main__':
