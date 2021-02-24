@@ -53,6 +53,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS"deceased" (
 )""")
 
 conn.commit()
+conn.close()
 
 
 def login_required(f):
@@ -78,8 +79,32 @@ def index():
 
     c.execute("SELECT * FROM deceased")
     deceased = c.fetchall()
+    conn.commit()
+    conn.close()
 
     return render_template("index.html", deceased=deceased)
+
+
+@app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add():
+    if request.method == "POST":
+        first_name = request.form.get("first_name")
+        second_name = request.form.get("second_name")
+        location = request.form.get("location")
+
+        conn = sqlite3.connect('mortuus.db')
+        c = conn.cursor()
+
+        c.execute("INSERT INTO main.deceased ('first name', 'last name', 'location') VALUES (?,?,?)",
+                  (first_name, second_name, location))
+        conn.commit()
+        conn.close()
+
+        return redirect("/")
+
+    else:
+        return redirect("/")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -108,6 +133,8 @@ def login():
             "SELECT * FROM users WHERE  username = ?", (username,))
 
         rows = c.fetchall()
+        conn.commit()
+        conn.close()
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
@@ -125,9 +152,10 @@ def login():
         return render_template("login.html")
 
 
+"""
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Register user"""
+    #Register user
 
     if request.method == "POST":
         # Ensure username was submitted
@@ -158,9 +186,11 @@ def register():
         c.execute("INSERT INTO users (username, hash) VALUES (?,?)",
                   (username, hash))
         conn.commit()
+        conn.close()
         return redirect("login")
 
     return render_template("register.html")
+"""
 
 
 @app.route("/logout")
