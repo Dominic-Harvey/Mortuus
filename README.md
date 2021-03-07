@@ -1,3 +1,3 @@
 # mortuus
 
-A deceased mangment system for modern funeral homes
+A deceased management system for modern funeral homes
