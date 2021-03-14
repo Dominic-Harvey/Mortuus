@@ -1,10 +1,11 @@
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, flash
 from flask_session import Session
 import sqlite3
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
+import json
 
 app = Flask(__name__)
 
@@ -41,15 +42,15 @@ c.execute("""CREATE TABLE IF NOT EXISTS"deceased" (
 	"first name"	TEXT NOT NULL,
     "last name"	TEXT NOT NULL,
 	"location"	TEXT NOT NULL,
-    "rfb"	TEXT,
-	"c/b"	TEXT,
-	"viewing"	TEXT,
-	"papers"	TEXT,
-	"music"	TEXT,
-	"sheets"	TEXT,
-	"encoffined"	TEXT,
-	"clothes"	TEXT,
-	"prep"	TEXT
+    "rfb"   TEXT DEFAULT '',
+	"c/b"	TEXT DEFAULT '',
+	"viewing"	TEXT DEFAULT '',
+	"papers"	TEXT DEFAULT '',
+	"music"	TEXT DEFAULT '',
+	"sheets"	TEXT DEFAULT '',
+	"encoffined"	TEXT DEFAULT '',
+	"clothes"	TEXT DEFAULT '',
+	"prep"	TEXT DEFAULT ''
 )""")
 
 conn.commit()
@@ -90,19 +91,47 @@ def index():
 def add():
     if request.method == "POST":
         first_name = request.form.get("first_name")
-        second_name = request.form.get("second_name")
+        last_name = request.form.get("last_name")
         location = request.form.get("location")
 
         conn = sqlite3.connect('mortuus.db')
         c = conn.cursor()
 
         c.execute("INSERT INTO main.deceased ('first name', 'last name', 'location') VALUES (?,?,?)",
-                  (first_name, second_name, location))
+                  (first_name, last_name, location))
         conn.commit()
         conn.close()
 
         return redirect("/")
 
+    else:
+        return redirect("/")
+
+
+@app.route('/update', methods=['GET', 'POST'])
+@login_required
+def update():
+    if request.method == "POST":
+
+        deceased_details = ["first_name", "last_name", "location", "rfb", "cb",
+                            "viewing", "papers", "music", "sheets", "encoffined", "clothes", "prep", "id"]
+
+        for i, data in enumerate(deceased_details):
+            deceased_details[i] = request.form.get(data)
+            # if request.form.get(data) == None:
+            #    deceased_details[i] = "None"
+            if i == 12:
+                break
+
+        conn = sqlite3.connect('mortuus.db')
+        c = conn.cursor()
+
+        c.execute("UPDATE main.deceased SET location = ?, rfb = ?, 'c/b' = ?, viewing = ?, papers = ?, music = ?, sheets = ?, encoffined = ?, clothes = ?, prep = ? WHERE id = ?",
+                  (deceased_details[2], deceased_details[3], deceased_details[4], deceased_details[5], deceased_details[6], deceased_details[7], deceased_details[8], deceased_details[9], deceased_details[10], deceased_details[11], deceased_details[12]))
+        conn.commit()
+        conn.close()
+
+        return redirect("/")
     else:
         return redirect("/")
 
@@ -130,7 +159,7 @@ def login():
         c = conn.cursor()
 
         c.execute(
-            "SELECT * FROM users WHERE  username = ?", (username,))
+            "SELECT * FROM users WHERE username = ?", (username,))
 
         rows = c.fetchall()
         conn.commit()

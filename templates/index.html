@@ -11,7 +11,7 @@
 {% block main %}
 <body>
 <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-  <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3">Gordon Barbers</a>
+  <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3">Gordon Barbers Funeral Home</a>
   <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
   <ul class="navbar-nav px-3">
     <li class="nav-item text-nowrap">
@@ -73,7 +73,7 @@
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group me-2">
             <button type="button" class="btn btn-bg btn-outline-secondary" onclick="dropDown('add')">Add</button>
-            <button type="button" class="btn btn-bg btn-outline-secondary" onclick="dropDown('update')">Update</button>
+            <button type="submit" class="btn btn-bg btn-outline-secondary" onclick="dropDown('update')">Update</button>
             <button type="button" class="btn btn-bg btn-outline-secondary" onclick="dropDown('delete')">Delete</button>
           </div>
         </div>
@@ -127,8 +127,8 @@
   <div class="overlay-content form-group">
     <form action="/add" method="post">
     <h2>Add A New Deceased To The Record</h2>
-      <input type="text" name="first_name" class="form-control-sm mx-2" placeholder="First Name" pattern="^[a-zA-Z ]*$" title="Text Only" required>
-      <input type="text" name="second_name" class="form-control-sm mx-2" placeholder="Second Name" pattern="^[a-zA-Z ]*$"  title="Text Only" required>
+      <input type="text" autocomplete="off" name="first_name" class="form-control-sm mx-2" placeholder="First Name" pattern="^[a-zA-Z ]*$" title="Text Only" required>
+      <input type="text" autocomplete="off" name="last_name" class="form-control-sm mx-2" placeholder="Last Name" pattern="^[a-zA-Z ]*$"  title="Text Only" required>
       <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location" pattern="[0-9]{4}$" title="4 Digit Number Only" required>
       <button type="submit" class="form-control-sm btn-dark">Save</button>
     </form>
@@ -139,18 +139,27 @@
   <a href="javascript:void(0)" class="closebtn" onclick="closeDropDown('update')">&times;</a>
   <div class="overlay-content form-group">
     <form action="/update" method="post">
-    <h2>Update Deceased Record</h2>
-      <input type="text" name="first_name" class="form-control-sm mx-2" placeholder="First Name"  required>
-      <input type="text" name="second_name" class="form-control-sm mx-2" placeholder="Second Name" required>
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location"  required>
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location" value="">
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location">
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location">
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location">
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location">
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location">
-      <input type="text" name="location" class="form-control-sm mx-2" placeholder="Location">
-      <button type="submit" class="form-control-sm btn-dark">Save</button>
+      <h2>Choose A Deceased To Update</h2>
+        <select id="deceased_to_update" name="deceased_to_update" onchange="updateValues(this)">
+          <option value="" selected disabled hidden>Select Deceased</option>
+          {% for row in deceased %}
+          <option id="{{ loop.index0 }}" value="{{ deceased[loop.index0] }}">{{ deceased[loop.index0][1] }} {{ deceased[loop.index0][2] }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="id" id="id" required style="display:none;">
+        <input type="text" name="first_name" id="first_name" required style="display:none;">
+        <input type="text" name="last_name" id="last_name" required style="display:none;">
+        <input type="text" name="location" id="location" class="form-control-sm mx-2 update-input" placeholder="Location" pattern="[0-9]{4}$" title="4 Digit Number Only" required>
+        <input type="text" name="rfb" id="rfb" class="form-control-sm mx-2 update-input" placeholder="RFB">
+        <input type="text" name="cb" id="cb" class="form-control-sm mx-2 update-input" placeholder="C/B">
+        <input type="text" name="viewing" id="viewing" autocomplete="off" class="form-control-sm mx-2 update-input" placeholder="Viewing">
+        <input type="text" name="papers" id="papers" autocomplete="off" class="form-control-sm mx-2 update-input" placeholder="Papers">
+        <input type="text" name="music" id="music" autocomplete="off" class="form-control-sm mx-2 update-input" placeholder="Music">
+        <input type="text" name="sheets" id="sheets" autocomplete="off" class="form-control-sm mx-2 update-input" placeholder="Sheets">
+        <input type="text" name="encoffined" id="encoffined" autocomplete="off" class="form-control-sm mx-2 update-input" style="width: 90px" placeholder="Encoffined">
+        <input type="text" name="clothes" id="clothes" autocomplete="off" class="form-control-sm mx-2 update-input" placeholder="Clothes">
+        <input type="text" name="prep" id="prep" autocomplete="off" class="form-control-sm mx-2 update-input" placeholder="Prep">
+        <button type="submit" class="form-control-sm btn-dark">Save</button>
     </form>
   </div>
 </div>
@@ -164,19 +173,25 @@
     document.getElementById(type).style.height = "0%";
   }
 
-  $('td').on('click', function() {
-    var $this = $(this);
-    var $input = $('<input>', {
-        value: $this.text(),
-        type: 'text',
-        blur: function() {
-           $this.text(this.value);
-        },
-        keyup: function(e) {
-           if (e.which === 13) $input.blur();
-        }
-    }).appendTo( $this.empty() ).focus();
-  });
+  function updateValues(selectObject) {
+    var deceasedDetails = selectObject.value.split('(').join('');
+    deceasedDetails = deceasedDetails.split(')').join('');
+    deceasedDetails = deceasedDetails.split("'").join('');
+    deceasedDetails = deceasedDetails.split(',');
+
+    for (var i = 0; i < deceasedDetails.length; i++) {
+      deceasedDetails[i] = deceasedDetails[i].trim()
+    }
+
+    var inputFields = ["id", "first_name", "last_name", "location", "rfb", "cb", "viewing", "papers", "music", "sheets", "encoffined", "clothes", "prep"];
+
+    for (i = 0; i < inputFields.length; i++) {
+      if (deceasedDetails[i] != "None") {
+        document.getElementById(inputFields[i]).value = deceasedDetails[i];
+      }
+    }
+  }
+
 </script>
 
 {% endblock %}
