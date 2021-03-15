@@ -164,6 +164,22 @@
   </div>
 </div>
 
+<div id="delete" class="overlay">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeDropDown('delete')">&times;</a>
+  <div class="overlay-content form-group">
+    <form action="/delete" method="post">
+    <h2>Delete A Deceased From The Record</h2>
+      <select name="deceased_to_delete" onchange="updateValues(this)">
+        <option value="" selected disabled hidden>Select Deceased</option>
+        {% for row in deceased %}
+        <option value="{{ deceased[loop.index0][0] }}">{{ deceased[loop.index0][1] }} {{ deceased[loop.index0][2] }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="form-control-sm btn-dark">Delete</button>
+    </form>
+  </div>
+</div>
+
 <script>
   function dropDown(type) {
     document.getElementById(type).style.height = "100%";

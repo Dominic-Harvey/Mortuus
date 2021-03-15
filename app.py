@@ -136,6 +136,25 @@ def update():
         return redirect("/")
 
 
+@app.route('/delete', methods=['GET', 'POST'])
+@login_required
+def delete():
+    if request.method == "POST":
+        deceased_id = request.form.get("deceased_to_delete")
+        conn = sqlite3.connect('mortuus.db')
+        c = conn.cursor()
+
+        c.execute("DELETE FROM main.deceased WHERE id = ?",
+                  (deceased_id))
+        conn.commit()
+        conn.close()
+
+        return redirect("/")
+
+    else:
+        return redirect("/")
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
