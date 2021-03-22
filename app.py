@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session, flash
+from flask import Flask, redirect, render_template, request, session, flash, url_for
 from flask_session import Session
 import sqlite3
 from tempfile import mkdtemp
@@ -6,6 +6,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 import json
+import re
 
 app = Flask(__name__)
 
@@ -71,19 +72,36 @@ def login_required(f):
     return decorated_function
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
+@app.route('/<path:branch>', methods=['GET'])
 @login_required
-def index():
+def index(branch="All Deceased"):
+    if session["search"] == True:
+        search = request.args['search']
+        session['search'] = False
+        branch_names = {
+            "0181": "Gordon Barbers Aylsham Road",
+            "0956": "Norwich Care Centre",
+            "0518": "Gordon Barbers St Williams Way",
+            "1049": "Gordon Barbers Eaton",
+            "0182": "Gordon Barbers Harvey's",
+            "1121": "Gordon Barbers Hoveton"
+        }
+
+        if branch in branch_names:
+            branch = branch_names[branch] + ' ' + branch
+
+        return render_template("index.html", deceased=json.loads(search), search_active=True, branch=branch)
 
     conn = sqlite3.connect('mortuus.db')
     c = conn.cursor()
 
-    c.execute("SELECT * FROM deceased")
+    c.execute("SELECT * FROM deceased ORDER BY `last name`")
     deceased = c.fetchall()
     conn.commit()
     conn.close()
 
-    return render_template("index.html", deceased=deceased)
+    return render_template("index.html", deceased=deceased, branch=branch)
 
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -155,6 +173,50 @@ def delete():
         return redirect("/")
 
 
+@app.route('/search', methods=['GET', 'POST'])
+@app.route('/search/<path:branch>', methods=['GET', 'POST'])
+@login_required
+def search(branch=None):
+    if request.method == "POST":
+
+        search = request.form.get("search")
+        names = search.split()
+        if len(names) == 1:
+            names.append(search)
+
+        conn = sqlite3.connect('mortuus.db')
+        c = conn.cursor()
+
+        c.execute(
+            "SELECT * FROM deceased WHERE `first name` LIKE ? OR `last name` LIKE ? OR `first name` LIKE ? AND `last name` LIKE ? ORDER BY `last name`", (names[0], names[0], names[0], names[1]))
+        deceased = c.fetchall()
+        session['search'] = True
+        search_json = json.dumps(deceased)
+        conn.commit()
+        conn.close()
+
+        # return render_template("index.html", deceased=deceased)
+        return redirect(url_for("index", search=search_json, branch=search))
+
+    else:
+        branch_check = re.search("[0-9]{4}$", branch)
+        if branch_check != None:
+            conn = sqlite3.connect('mortuus.db')
+            c = conn.cursor()
+
+            c.execute(
+                "SELECT * FROM deceased WHERE location = ? ORDER BY `last name`", (branch,))
+            deceased = c.fetchall()
+            session['search'] = True
+            search = json.dumps(deceased)
+            conn.commit()
+            conn.close()
+
+            return redirect(url_for("index", search=search, branch=branch))
+
+        return render('/')
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -188,8 +250,10 @@ def login():
         if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
             return render_template("login.html", error="Invalid username or password")
 
-            # Remember which user has logged in
+        # Remember which user has logged in
         session["user_id"] = rows[0][0]
+        # Initialises variable for checking if user has perfomred a search
+        session['search'] = False
 
         # Redirect user to home page
         return redirect("/")

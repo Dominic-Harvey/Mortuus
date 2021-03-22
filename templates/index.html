@@ -12,7 +12,10 @@
 <body>
 <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
   <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3">Gordon Barbers Funeral Home</a>
-  <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+  <form action="/search" method="post">
+    <input name="search" class="form-control form-control-dark w-100" autocomplete="off" type="text" placeholder="Search" aria-label="Search">
+  </form>
+
   <ul class="navbar-nav px-3">
     <li class="nav-item text-nowrap">
       <a class="nav-link" href="/logout">Sign out</a>
@@ -26,50 +29,46 @@
       <div class="position-sticky pt-3">
         <ul class="nav flex-column">
           <h5 class="d-flex justify-content-between align-items-center px-3 mt-4 mb-1 bold"><u>
-            Filters
+            Sort By Branch
           </u></h5>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">
+            <a class="nav-link {% if search_active != true %} active {% endif %}" href="/">
               All Deceased
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 0956 %} active {% endif %} {% endif %}" href="/search/0956">
               My Branch
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              Arranged
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 0181 %} active {% endif %} {% endif %}" href="/search/0181">
+              Gordon Barbers Aylsham Road
+            </a>
+          </li> 
+          <li class="nav-item">
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 0518 %} active {% endif %} {% endif %}" href="/search/0518">
+              Gordon Barbers St Williams Way
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              Into Care
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-                Currently On Hold 
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 1049 %} active {% endif %} {% endif %}" href="/search/1049">
+              Gordon Barbers Eaton
             </a>
           <li class="nav-item">
-            <a class="nav-link" href="#">
-                Covid-19 Positive 
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 0192 %} active {% endif %} {% endif %}" href="/search/0182">
+              Gordon Barbers Harvey's
             </a>
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              Order By Funeral Date 
-            </a>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              Order By Into Care 
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 1121 %} active {% endif %} {% endif %}" href="/search/1121">
+              Gordon Barbers Hoveton
             </a>
       </div>
     </nav>
 
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Norwich Care Centre 0956</h1>
+        <h1 class="h2">{{branch}}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group me-2">
             <button type="button" class="btn btn-bg btn-outline-secondary" onclick="dropDown('add')">Add</button>
