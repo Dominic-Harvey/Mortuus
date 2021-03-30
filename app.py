@@ -75,10 +75,9 @@ def login_required(f):
 @app.route('/', methods=['GET'])
 @app.route('/<path:branch>', methods=['GET'])
 @login_required
-def index(branch="All Deceased"):
+def index(branch=None):
     if session["search"] == True:
         search = request.args['search']
-        session['search'] = False
         branch_names = {
             "0181": "Gordon Barbers Aylsham Road",
             "0956": "Norwich Care Centre",
@@ -89,9 +88,12 @@ def index(branch="All Deceased"):
         }
 
         if branch in branch_names:
-            branch = branch_names[branch] + ' ' + branch
+            branch_name = branch_names[branch]
+        else:
+            branch_name = None
 
-        return render_template("index.html", deceased=json.loads(search), search_active=True, branch=branch)
+        session['search'] = False
+        return render_template("index.html", deceased=json.loads(search), search_active=True, branch=branch, branch_name=branch_name)
 
     conn = sqlite3.connect('mortuus.db')
     c = conn.cursor()
@@ -100,8 +102,7 @@ def index(branch="All Deceased"):
     deceased = c.fetchall()
     conn.commit()
     conn.close()
-
-    return render_template("index.html", deceased=deceased, branch=branch)
+    return render_template("index.html", deceased=deceased, branch="All Deceased")
 
 
 @app.route('/add', methods=['GET', 'POST'])

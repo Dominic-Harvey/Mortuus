@@ -29,7 +29,7 @@
       <div class="position-sticky pt-3">
         <ul class="nav flex-column">
           <h5 class="d-flex justify-content-between align-items-center px-3 mt-4 mb-1 bold"><u>
-            Sort By Branch
+            Filter By Branch
           </u></h5>
           <li class="nav-item">
             <a class="nav-link {% if search_active != true %} active {% endif %}" href="/">
@@ -56,7 +56,7 @@
               Gordon Barbers Eaton
             </a>
           <li class="nav-item">
-            <a class="nav-link {% if branch is defined %} {% if branch | int == 0192 %} active {% endif %} {% endif %}" href="/search/0182">
+            <a class="nav-link {% if branch is defined %} {% if branch | int == 0182 %} active {% endif %} {% endif %}" href="/search/0182">
               Gordon Barbers Harvey's
             </a>
           <li class="nav-item">
@@ -68,7 +68,7 @@
 
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{branch}}</h1>
+        <h1 class="h2">{% if branch_name is defined and branch_name is not none %} {{branch_name}} {% endif %} {{branch}}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group me-2">
             <button type="button" class="btn btn-bg btn-outline-secondary" onclick="dropDown('add')">Add</button>
