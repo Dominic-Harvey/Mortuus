@@ -164,7 +164,7 @@ def delete():
         c = conn.cursor()
 
         c.execute("DELETE FROM main.deceased WHERE id = ?",
-                  (deceased_id))
+                  (deceased_id,))
         conn.commit()
         conn.close()
 
@@ -265,10 +265,9 @@ def login():
         return render_template("login.html")
 
 
-"""
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    #Register user
+    # Register user
 
     if request.method == "POST":
         # Ensure username was submitted
@@ -303,7 +302,6 @@ def register():
         return redirect("login")
 
     return render_template("register.html")
-"""
 
 
 @app.route("/logout")
