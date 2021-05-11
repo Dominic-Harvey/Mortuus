@@ -79,12 +79,12 @@ def index(branch=None):
     if session["search"] == True:
         search = request.args['search']
         branch_names = {
-            "0181": "Gordon Barbers Aylsham Road",
-            "0956": "Norwich Care Centre",
-            "0518": "Gordon Barbers St Williams Way",
-            "1049": "Gordon Barbers Eaton",
-            "0182": "Gordon Barbers Harvey's",
-            "1121": "Gordon Barbers Hoveton"
+            "0001": "Funeral Home High Street",
+            "0002": "Funeral Home Park Lane",
+            "0003": "Funeral Home Fake Lane",
+            "0004": "Funeral Home Main Street",
+            "0005": "Funeral Home Nowhere Road",
+            "0006": "Funeral Home Anyplace Close"
         }
 
         if branch in branch_names:
